@@ -7,9 +7,9 @@ import com.microsoft.azure.functions.*;
 /**
  * Azure Functions with HTTP Trigger.
  */
-public class HttpTriggerJava {
-    @FunctionName("getCurrentWeather")
-    public HttpResponseMessage run(
+public class WeatherHttpFunction {
+    @FunctionName("get-current-weather")
+    public HttpResponseMessage getCurrentWeather(
             @HttpTrigger(name = "req", methods = {HttpMethod.GET}, authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context) {
         context.getLogger().info("Java HTTP trigger processed a request.");
