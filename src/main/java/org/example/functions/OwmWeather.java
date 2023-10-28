@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OwmWeatherMinimal {
+public class OwmWeather {
     @JsonProperty("coord")
     private Coordinates coordinates;
 
@@ -20,4 +20,6 @@ public class OwmWeatherMinimal {
     private List<WeatherCondition> weatherConditions;
 
     private OwmWeatherMain main;
+
+    private OwmClouds clouds;
 }

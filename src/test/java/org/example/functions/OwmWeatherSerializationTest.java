@@ -12,13 +12,13 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-class OwmWeatherMinimalSerializationTest {
+class OwmWeatherSerializationTest {
     @ParameterizedTest
     @MethodSource(MethodArgumentsSource)
-    void deserializeOwmWeatherMinimal(String jsonString, OwmWeatherMinimal expectedWeather) throws JsonProcessingException {
+    void deserializeOwmWeatherMinimal(String jsonString, OwmWeather expectedWeather) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
 
-        OwmWeatherMinimal actualWeather = mapper.readValue(jsonString, OwmWeatherMinimal.class);
+        OwmWeather actualWeather = mapper.readValue(jsonString, OwmWeather.class);
 
         assertNotNull(actualWeather);
         assertEquals(expectedWeather, actualWeather);
@@ -35,24 +35,29 @@ class OwmWeatherMinimalSerializationTest {
         OwmWeatherMain wm1 = new OwmWeatherMain(
                 298.48, 298.74, 297.56, 300.05,
                 1015, 64, 1015, 933);
+        OwmClouds clouds1 = new OwmClouds(50);
         return Stream.of(
                 Arguments.of(
-                        getJsonOwmWeather(c1, wc1, wm1),
-                        new OwmWeatherMinimal(c1, wc1, wm1)
+                        getJsonOwmWeather(c1, wc1, wm1, clouds1),
+                        new OwmWeather(c1, wc1, wm1, clouds1)
                 )
         );
     }
 
-    private static String getJsonOwmWeather(Coordinates coordinates, List<WeatherCondition> conditions, OwmWeatherMain main)
+    private static String getJsonOwmWeather(
+            Coordinates coordinates, List<WeatherCondition> conditions,
+            OwmWeatherMain main, OwmClouds clouds
+            )
             throws JsonProcessingException
     {
         ObjectMapper mapper = new ObjectMapper();
         String coordinatesJson = mapper.writeValueAsString(coordinates);
         String conditionsJson = mapper.writeValueAsString(conditions);
         String mainJson = mapper.writeValueAsString(main);
+        String cloudsJson = mapper.writeValueAsString(clouds);
         return String.format(
-                "{\"coord\": %s,\"weather\": %s,\"main\": %s}",
-                coordinatesJson, conditionsJson, mainJson
+                "{\"coord\": %s,\"weather\": %s,\"main\": %s,\"clouds\":%s}",
+                coordinatesJson, conditionsJson, mainJson, cloudsJson
         );
     }
 }
