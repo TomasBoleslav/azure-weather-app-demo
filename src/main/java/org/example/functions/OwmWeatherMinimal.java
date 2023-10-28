@@ -18,4 +18,6 @@ public class OwmWeatherMinimal {
 
     @JsonProperty("weather")
     private List<WeatherCondition> weatherConditions;
+
+    private OwmWeatherMain main;
 }
