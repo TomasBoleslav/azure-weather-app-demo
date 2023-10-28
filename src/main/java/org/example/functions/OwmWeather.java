@@ -23,7 +23,9 @@ public class OwmWeather {
 
     private OwmClouds clouds;
 
-    private int visibility;
+    private Integer visibility;
 
     private Wind wind;
+
+    private Precipitation rain;
 }
