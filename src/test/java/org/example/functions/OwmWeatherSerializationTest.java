@@ -36,17 +36,19 @@ class OwmWeatherSerializationTest {
                 298.48, 298.74, 297.56, 300.05,
                 1015, 64, 1015, 933);
         OwmClouds clouds1 = new OwmClouds(50);
+        int visibility1 = 5000;
+        Wind wind1 = new Wind(0.62, 349, 1.18);
         return Stream.of(
                 Arguments.of(
-                        getJsonOwmWeather(c1, wc1, wm1, clouds1),
-                        new OwmWeather(c1, wc1, wm1, clouds1)
+                        getJsonOwmWeather(c1, wc1, wm1, clouds1, visibility1, wind1),
+                        new OwmWeather(c1, wc1, wm1, clouds1, visibility1, wind1)
                 )
         );
     }
 
     private static String getJsonOwmWeather(
             Coordinates coordinates, List<WeatherCondition> conditions,
-            OwmWeatherMain main, OwmClouds clouds
+            OwmWeatherMain main, OwmClouds clouds, int visibility, Wind wind
             )
             throws JsonProcessingException
     {
@@ -55,9 +57,10 @@ class OwmWeatherSerializationTest {
         String conditionsJson = mapper.writeValueAsString(conditions);
         String mainJson = mapper.writeValueAsString(main);
         String cloudsJson = mapper.writeValueAsString(clouds);
+        String windJson = mapper.writeValueAsString(wind);
         return String.format(
-                "{\"coord\": %s,\"weather\": %s,\"main\": %s,\"clouds\":%s}",
-                coordinatesJson, conditionsJson, mainJson, cloudsJson
+                "{\"coord\": %s,\"weather\": %s,\"main\": %s,\"clouds\":%s,\"visibility\":%s,\"wind\":%s}",
+                coordinatesJson, conditionsJson, mainJson, cloudsJson, visibility, windJson
         );
     }
 }

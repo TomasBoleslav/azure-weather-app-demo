@@ -22,4 +22,8 @@ public class OwmWeather {
     private OwmWeatherMain main;
 
     private OwmClouds clouds;
+
+    private int visibility;
+
+    private Wind wind;
 }
