@@ -6,6 +6,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
 import org.apache.commons.io.IOUtils;
@@ -13,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 /**
  * Azure Functions with HTTP Trigger.
  */
+@SuppressWarnings("unused")
 public class WeatherHttpFunction {
     @FunctionName("get-current-weather")
     public HttpResponseMessage getCurrentWeather(
@@ -28,10 +30,18 @@ public class WeatherHttpFunction {
         if (query == null) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("No query").build();
         } else {
+
             String url = "https://api.openweathermap.org/data/2.5/weather?appid=" + apiKey + "&q=" + query;
             String responseBody = readContentFromUrl(url);
-            return request.createResponseBuilder(HttpStatus.OK).body(responseBody).build();
+            System.out.println(responseBody);
+            ObjectMapper mapper = new ObjectMapper();
+            OwmWeather weather = mapper.readValue(responseBody, OwmWeather.class);
+            String weatherJson = mapper.writeValueAsString(weather);
+            return request.createResponseBuilder(HttpStatus.OK).body(weatherJson).build();
+
+            //return request.createResponseBuilder(HttpStatus.OK).body(weather).build();
         }
+
     }
 
     private static String readContentFromUrl(String urlString) throws java.io.IOException {
