@@ -43,6 +43,10 @@ public class WeatherConverter {
     }
 
     private Integer convertClouds(OwmWeather owmWeather) {
+        OwmClouds clouds = owmWeather.getClouds();
+        if (clouds == null) {
+            return null;
+        }
         return owmWeather.getClouds().getAll();
     }
 
@@ -63,6 +67,10 @@ public class WeatherConverter {
     }
 
     private Long convertTimestamp(OwmWeather owmWeather) {
-        return owmWeather.getTimestamp();
+        Long timestamp = owmWeather.getTimestamp();
+        if (timestamp == null) {
+            return System.currentTimeMillis() / 1000L;
+        }
+        return timestamp;
     }
 }
