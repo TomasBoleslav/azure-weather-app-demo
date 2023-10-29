@@ -28,4 +28,9 @@ public class OwmWeather {
     private Wind wind;
 
     private Precipitation rain;
+
+    private Precipitation snow;
+
+    @JsonProperty("dt")
+    private Long timestamp;
 }

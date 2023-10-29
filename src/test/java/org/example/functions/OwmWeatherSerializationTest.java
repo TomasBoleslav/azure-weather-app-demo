@@ -39,10 +39,12 @@ class OwmWeatherSerializationTest {
         int visibility1 = 5000;
         Wind wind1 = new Wind(0.62, 349, 1.18);
         Precipitation rain1 = new Precipitation(3.16, 0.0);
+        Precipitation snow1 = new Precipitation(2.5, 4.4);
+        Long timestamp1 = 1661870592L;
         return Stream.of(
                 Arguments.of(
-                        getJsonOwmWeather(c1, wc1, wm1, clouds1, visibility1, wind1, rain1),
-                        new OwmWeather(c1, wc1, wm1, clouds1, visibility1, wind1, rain1)
+                        getJsonOwmWeather(c1, wc1, wm1, clouds1, visibility1, wind1, rain1, snow1, timestamp1),
+                        new OwmWeather(c1, wc1, wm1, clouds1, visibility1, wind1, rain1, snow1, timestamp1)
                 )
         );
     }
@@ -50,7 +52,7 @@ class OwmWeatherSerializationTest {
     private static String getJsonOwmWeather(
             Coordinates coordinates, List<WeatherCondition> conditions,
             OwmWeatherMain main, OwmClouds clouds, int visibility, Wind wind,
-            Precipitation rain
+            Precipitation rain, Precipitation snow, Long timestamp
             )
             throws JsonProcessingException
     {
@@ -61,9 +63,22 @@ class OwmWeatherSerializationTest {
         String cloudsJson = mapper.writeValueAsString(clouds);
         String windJson = mapper.writeValueAsString(wind);
         String rainJson = mapper.writeValueAsString(rain);
-        return String.format(
-                "{\"coord\": %s,\"weather\": %s,\"main\": %s,\"clouds\":%s,\"visibility\":%s,\"wind\":%s,\"rain\":%s}",
-                coordinatesJson, conditionsJson, mainJson, cloudsJson, visibility, windJson, rainJson
+        String snowJson = mapper.writeValueAsString(snow);
+        return String.format("""
+                        {
+                            "coord": %s,
+                            "weather": %s,
+                            "main": %s,
+                            "clouds": %s,
+                            "visibility": %s,
+                            "wind": %s,
+                            "rain": %s,
+                            "snow": %s,
+                            "dt": %s
+                        }
+                        """,
+                coordinatesJson, conditionsJson, mainJson, cloudsJson,
+                visibility, windJson, rainJson, snowJson, timestamp
         );
     }
 }
