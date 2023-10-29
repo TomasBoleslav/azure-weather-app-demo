@@ -30,12 +30,13 @@ public class WeatherHttpFunction {
         if (query == null) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("No query").build();
         } else {
-
             String url = "https://api.openweathermap.org/data/2.5/weather?appid=" + apiKey + "&q=" + query;
             String responseBody = readContentFromUrl(url);
             System.out.println(responseBody);
             ObjectMapper mapper = new ObjectMapper();
-            OwmWeather weather = mapper.readValue(responseBody, OwmWeather.class);
+            OwmWeather owmWeather = mapper.readValue(responseBody, OwmWeather.class);
+            WeatherConverter converter = new WeatherConverter();
+            Weather weather = converter.convertWeather(owmWeather);
             String weatherJson = mapper.writeValueAsString(weather);
             return request.createResponseBuilder(HttpStatus.OK).body(weatherJson).build();
 

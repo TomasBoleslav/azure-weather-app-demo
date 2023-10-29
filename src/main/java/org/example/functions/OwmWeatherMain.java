@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OwmWeatherMain {
-    private double temp;
-    private double feelsLike;
-    private double tempMin;
-    private double tempMax;
-    private double pressure;
-    private double humidity;
-    private double seaLevel;
-    private double grndLevel;
+    private Double temp;
+    private Double feelsLike;
+    private Double tempMin;
+    private Double tempMax;
+    private Integer pressure;
+    private Integer humidity;
+    private Integer seaLevel;
+    private Integer grndLevel;
 }
