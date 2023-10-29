@@ -11,6 +11,12 @@ import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
 import org.apache.commons.io.IOUtils;
 
+/*
+ * TODO:
+ *  1. Refactoring - weather api
+ *  2. Persistence layer - store cache in Cosmos DB
+ */
+
 /**
  * Azure Functions with HTTP Trigger.
  */
@@ -30,15 +36,28 @@ public class WeatherHttpFunction {
         if (query == null) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("No query").build();
         } else {
-            String url = "https://api.openweathermap.org/data/2.5/weather?appid=" + apiKey + "&q=" + query;
-            String responseBody = readContentFromUrl(url);
-            System.out.println(responseBody);
             ObjectMapper mapper = new ObjectMapper();
-            OwmWeather owmWeather = mapper.readValue(responseBody, OwmWeather.class);
-            WeatherConverter converter = new WeatherConverter();
-            Weather weather = converter.convertWeather(owmWeather);
-            String weatherJson = mapper.writeValueAsString(weather);
-            return request.createResponseBuilder(HttpStatus.OK).body(weatherJson).build();
+            String owmGeocodingUrl = "https://api.openweathermap.org/geo/1.0/direct?appid=" + apiKey + "&limit=5&q=" + query;
+            String owmGeocodingResponseBody = readContentFromUrl(owmGeocodingUrl);
+            OwmLocation[] owmLocations = mapper.readValue(owmGeocodingResponseBody, OwmLocation[].class);
+
+            List<LocalWeather> localWeatherResults = new ArrayList<>();
+            for (OwmLocation owmLocation : owmLocations) {
+                GeolocationConverter geolocationConverter = new GeolocationConverter();
+                Location location = geolocationConverter.convertLocation(owmLocation);
+
+                String owmWeatherUrl = "https://api.openweathermap.org/data/2.5/weather?appid=" + apiKey +
+                        "&lat=" + owmLocation.getLatitude() + "&lon=" + owmLocation.getLongitude();
+                String owmWeatherResponseBody = readContentFromUrl(owmWeatherUrl);
+                OwmWeather owmWeather = mapper.readValue(owmWeatherResponseBody, OwmWeather.class);
+                WeatherConverter converter = new WeatherConverter();
+                Weather weather = converter.convertWeather(owmWeather);
+                localWeatherResults.add(new LocalWeather(location, weather));
+            }
+            String localWeatherResultsJson = mapper.writeValueAsString(localWeatherResults);
+            System.out.println(query);
+            System.out.println(query);
+            return request.createResponseBuilder(HttpStatus.OK).body(localWeatherResultsJson).build();
 
             //return request.createResponseBuilder(HttpStatus.OK).body(weather).build();
         }

@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 class OwmWeatherSerializationTest {
     @ParameterizedTest
     @MethodSource(MethodArgumentsSource)
