@@ -55,11 +55,11 @@ public class WeatherConverter {
     }
 
     private Precipitation convertRain(OwmWeather owmWeather) {
-        return owmWeather.getRain();
+        return convertPrecipitation(owmWeather.getRain());
     }
 
     private Precipitation convertSnow(OwmWeather owmWeather) {
-        return owmWeather.getSnow();
+        return convertPrecipitation(owmWeather.getSnow());
     }
 
     private Integer convertVisibility(OwmWeather owmWeather) {
@@ -72,5 +72,15 @@ public class WeatherConverter {
             return System.currentTimeMillis() / 1000L;
         }
         return timestamp;
+    }
+
+    private Precipitation convertPrecipitation(OwmPrecipitation owmPrecipitation) {
+        if (owmPrecipitation == null) {
+            return null;
+        }
+        return new Precipitation(
+                owmPrecipitation.getVolumeLastHour(),
+                owmPrecipitation.getVolumeLastThreeHours()
+        );
     }
 }

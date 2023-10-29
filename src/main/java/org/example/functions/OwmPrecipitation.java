@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class Pressure {
-    @JsonProperty("sea")
-    private Integer seaLevel;
+public class OwmPrecipitation {
+    @JsonProperty("1h")
+    private Double volumeLastHour;
 
-    @JsonProperty("ground")
-    private Integer groundLevel;
+    @JsonProperty("3h")
+    private Double volumeLastThreeHours;
 }

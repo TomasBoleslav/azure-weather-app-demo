@@ -38,8 +38,8 @@ class OwmWeatherSerializationTest {
         OwmClouds clouds1 = new OwmClouds(50);
         int visibility1 = 5000;
         Wind wind1 = new Wind(0.62, 349, 1.18);
-        Precipitation rain1 = new Precipitation(3.16, 0.0);
-        Precipitation snow1 = new Precipitation(2.5, 4.4);
+        OwmPrecipitation rain1 = new OwmPrecipitation(3.16, 0.0);
+        OwmPrecipitation snow1 = new OwmPrecipitation(2.5, 4.4);
         Long timestamp1 = 1661870592L;
         return Stream.of(
                 Arguments.of(
@@ -52,7 +52,7 @@ class OwmWeatherSerializationTest {
     private static String getJsonOwmWeather(
             Coordinates coordinates, List<WeatherCondition> conditions,
             OwmWeatherMain main, OwmClouds clouds, int visibility, Wind wind,
-            Precipitation rain, Precipitation snow, Long timestamp
+            OwmPrecipitation rain, OwmPrecipitation snow, Long timestamp
             )
             throws JsonProcessingException
     {
