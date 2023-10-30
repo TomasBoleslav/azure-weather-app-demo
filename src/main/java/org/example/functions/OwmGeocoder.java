@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class OwmGeocoder implements Geocoder {
 
@@ -33,7 +34,7 @@ public class OwmGeocoder implements Geocoder {
     private final String apiKey;
 
     private String getRequestUrl(String locationName) {
-        return String.format(GEOCODE_URL_TEMPLATE, apiKey, locationName);
+        return String.format(Locale.ENGLISH, GEOCODE_URL_TEMPLATE, apiKey, locationName);
     }
 
     private static List<OwmLocation> deserializeOwmLocations(String owmLocationsJson) throws IOException {

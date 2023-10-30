@@ -39,16 +39,10 @@ public class WeatherHttpFunction {
             ObjectMapper mapper = new ObjectMapper();
             Geocoder geocoder = new OwmGeocoder(apiKey);
             List<Location> locations = geocoder.findLocations(query);
+            WeatherProvider weatherProvider = new OwmWeatherProvider(apiKey);
             List<LocalWeather> localWeatherResults = new ArrayList<>();
             for (Location location : locations) {
-                String owmWeatherUrl = "https://api.openweathermap.org/data/2.5/weather" +
-                                "?appid=" + apiKey +
-                                "&lat=" + location.getCoordinates().getLatitude() +
-                                "&lon=" + location.getCoordinates().getLongitude();
-                String owmWeatherResponseBody = readContentFromUrl(owmWeatherUrl);
-                OwmWeather owmWeather = mapper.readValue(owmWeatherResponseBody, OwmWeather.class);
-                WeatherConverter converter = new WeatherConverter();
-                Weather weather = converter.convertWeather(owmWeather);
+                Weather weather = weatherProvider.fetchWeather(location.getCoordinates());
                 localWeatherResults.add(new LocalWeather(location, weather));
             }
             String localWeatherResultsJson = mapper.writeValueAsString(localWeatherResults);
