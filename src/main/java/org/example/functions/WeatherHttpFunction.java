@@ -37,17 +37,14 @@ public class WeatherHttpFunction {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("No query").build();
         } else {
             ObjectMapper mapper = new ObjectMapper();
-            String owmGeocodingUrl = "https://api.openweathermap.org/geo/1.0/direct?appid=" + apiKey + "&limit=5&q=" + query;
-            String owmGeocodingResponseBody = readContentFromUrl(owmGeocodingUrl);
-            OwmLocation[] owmLocations = mapper.readValue(owmGeocodingResponseBody, OwmLocation[].class);
-
+            Geocoder geocoder = new OwmGeocoder(apiKey);
+            List<Location> locations = geocoder.findLocations(query);
             List<LocalWeather> localWeatherResults = new ArrayList<>();
-            for (OwmLocation owmLocation : owmLocations) {
-                GeolocationConverter geolocationConverter = new GeolocationConverter();
-                Location location = geolocationConverter.convertLocation(owmLocation);
-
-                String owmWeatherUrl = "https://api.openweathermap.org/data/2.5/weather?appid=" + apiKey +
-                        "&lat=" + owmLocation.getLatitude() + "&lon=" + owmLocation.getLongitude();
+            for (Location location : locations) {
+                String owmWeatherUrl = "https://api.openweathermap.org/data/2.5/weather" +
+                                "?appid=" + apiKey +
+                                "&lat=" + location.getCoordinates().getLatitude() +
+                                "&lon=" + location.getCoordinates().getLongitude();
                 String owmWeatherResponseBody = readContentFromUrl(owmWeatherUrl);
                 OwmWeather owmWeather = mapper.readValue(owmWeatherResponseBody, OwmWeather.class);
                 WeatherConverter converter = new WeatherConverter();
@@ -55,11 +52,7 @@ public class WeatherHttpFunction {
                 localWeatherResults.add(new LocalWeather(location, weather));
             }
             String localWeatherResultsJson = mapper.writeValueAsString(localWeatherResults);
-            System.out.println(query);
-            System.out.println(query);
             return request.createResponseBuilder(HttpStatus.OK).body(localWeatherResultsJson).build();
-
-            //return request.createResponseBuilder(HttpStatus.OK).body(weather).build();
         }
 
     }
