@@ -1,16 +1,10 @@
 package org.example.functions;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import com.azure.cosmos.implementation.ConflictException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
-import org.apache.commons.io.IOUtils;
 
 /*
  * TODO:
@@ -37,15 +31,20 @@ public class WeatherHttpFunction {
         if (query == null) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("No query").build();
         } else {
+            WeatherService weatherService = new CachingWeatherService(
+                new OwmGeocoder(apiKey),
+                new OwmWeatherProvider(apiKey),
+                new CosmosWeatherCacheDao(
+                    System.getenv("COSMOS_DB_ENDPOINT"),
+                    System.getenv("COSMOS_DB_KEY")
+                )
+            );
+            List<LocalWeather> localWeatherList = weatherService.getLocalWeather(query);
             ObjectMapper mapper = new ObjectMapper();
-            Geocoder geocoder = new OwmGeocoder(apiKey);
-            List<Location> locations = geocoder.findLocations(query);
-            WeatherProvider weatherProvider = new OwmWeatherProvider(apiKey);
-            List<LocalWeather> localWeatherResults = new ArrayList<>();
-            for (Location location : locations) {
-                Weather weather = weatherProvider.fetchWeather(location.getCoordinates());
-                localWeatherResults.add(new LocalWeather(location, weather));
-            }
+            String localWeatherListJson = mapper.writeValueAsString(localWeatherList);
+            return request.createResponseBuilder(HttpStatus.OK).body(localWeatherListJson).build();
+
+            /*
             {
                 CosmosWeatherCacheDao weatherCacheDao = new CosmosWeatherCacheDao(
                         System.getenv("COSMOS_DB_ENDPOINT"),
@@ -65,14 +64,7 @@ public class WeatherHttpFunction {
             }
             String localWeatherResultsJson = mapper.writeValueAsString(localWeatherResults);
             return request.createResponseBuilder(HttpStatus.OK).body(localWeatherResultsJson).build();
-        }
-    }
-
-    private static String readContentFromUrl(String urlString) throws java.io.IOException {
-        URL url = new URL(urlString);
-        URLConnection urlConnection = url.openConnection();
-        try(InputStream inputStream = urlConnection.getInputStream()) {
-            return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            */
         }
     }
 }
