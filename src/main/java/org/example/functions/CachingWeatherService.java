@@ -3,6 +3,7 @@ package org.example.functions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CachingWeatherService implements WeatherService {
     private final Geocoder geocoder;
@@ -24,23 +25,33 @@ public class CachingWeatherService implements WeatherService {
         //  3b. Item does not exist -> fetch data using geocoder and weatherProvider, store it in a database and return
         //      the new item (maybe use upsert to avoid conflicts - writing an item with the same id
         //      from multiple instances of http function)
-        WeatherCacheItem weatherCacheItem = weatherCacheDao.readItem(locationName);
+        String normalizedLocationName = normalizeLocationName(locationName);
+        System.out.println(normalizedLocationName);
+        WeatherCacheItem weatherCacheItem = weatherCacheDao.readItem(normalizedLocationName);
         if (weatherCacheItem != null) {
             return weatherCacheItem.getResponses();
         }
-        List<LocalWeather> localWeatherResults = new ArrayList<>();
-        List<Location> locations = geocoder.findLocations(locationName);
+        List<LocalWeather> localWeatherList = new ArrayList<>();
+        List<Location> locations = geocoder.findLocations(normalizedLocationName);
         for (Location location : locations) {
             Weather weather = weatherProvider.fetchWeather(location.getCoordinates());
             LocalWeather localWeather = new LocalWeather(location, weather);
-            localWeatherResults.add(localWeather);
+            localWeatherList.add(localWeather);
         }
         // TODO: upsert for safety
-        weatherCacheDao.createItem(
-            new WeatherCacheItem(
-                    locationName.toLowerCase(), localWeatherResults
-            )
+        WeatherCacheItem newItem = new WeatherCacheItem(
+            normalizedLocationName, localWeatherList
         );
-        return localWeatherResults;
+        weatherCacheDao.createItem(newItem);
+        return localWeatherList;
+    }
+
+    private static String normalizeLocationName(String locationName) {
+        return locationName
+                .trim()
+                .replaceAll("\\s", " ")
+                .replaceAll(" +", " ")
+                .replaceAll(" *, *", ",")
+                .toLowerCase(Locale.ROOT);
     }
 }
