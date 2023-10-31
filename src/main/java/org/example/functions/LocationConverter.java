@@ -1,6 +1,6 @@
 package org.example.functions;
 
-public class GeolocationConverter {
+public class LocationConverter {
     public Location convertLocation(OwmLocation owmLocation) {
         return new Location(
                 owmLocation.getName(),

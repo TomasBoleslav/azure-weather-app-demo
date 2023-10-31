@@ -6,6 +6,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import com.azure.cosmos.implementation.ConflictException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
@@ -45,10 +46,26 @@ public class WeatherHttpFunction {
                 Weather weather = weatherProvider.fetchWeather(location.getCoordinates());
                 localWeatherResults.add(new LocalWeather(location, weather));
             }
+            {
+                CosmosWeatherCacheDao weatherCacheDao = new CosmosWeatherCacheDao(
+                        System.getenv("COSMOS_DB_ENDPOINT"),
+                        System.getenv("COSMOS_DB_KEY")
+                );
+                try {
+                    weatherCacheDao.createItem(
+                            new WeatherCacheItem(
+                                    query.toLowerCase(), localWeatherResults
+                            )
+                    );
+                } catch (ConflictException exception) {
+                    WeatherCacheItem item = weatherCacheDao.readItem(query.toLowerCase());
+                    String localWeatherResultsJson = mapper.writeValueAsString(item);
+                    return request.createResponseBuilder(HttpStatus.OK).body(localWeatherResultsJson).build();
+                }
+            }
             String localWeatherResultsJson = mapper.writeValueAsString(localWeatherResults);
             return request.createResponseBuilder(HttpStatus.OK).body(localWeatherResultsJson).build();
         }
-
     }
 
     private static String readContentFromUrl(String urlString) throws java.io.IOException {
