@@ -10,18 +10,22 @@ public class CosmosWeatherCacheDao implements WeatherCacheDao {
 
     public CosmosWeatherCacheDao(String host, String masterKey) {
         this.client = new CosmosClientBuilder()
-            .endpoint(host)
-            .key(masterKey)
-            .consistencyLevel(ConsistencyLevel.EVENTUAL)
-            .buildClient();
+                .endpoint(host)
+                .key(masterKey)
+                .consistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildClient();
         this.database = client.getDatabase(DATABASE_ID);
         this.container = database.getContainer(CONTAINER_ID);
     }
 
     @Override
-    public void createItem(WeatherCacheItem item) {
-        CosmosItemResponse<WeatherCacheItem> response = container.createItem(item);
-        // TODO: check response status
+    public void createItem(WeatherCacheItem item) throws IOException {
+        try {
+            CosmosItemResponse<WeatherCacheItem> response = container.createItem(item);
+            // TODO: check response status
+        } catch (CosmosException exception) {
+            throw new IOException(exception);
+        }
     }
 
     @Override
@@ -40,22 +44,30 @@ public class CosmosWeatherCacheDao implements WeatherCacheDao {
     }
 
     @Override
-    public void updateItem(WeatherCacheItem item) {
-        CosmosItemResponse<WeatherCacheItem> response = container.replaceItem(
-                item,
-                item.getId(),
-                new PartitionKey(item.getId()),
-                new CosmosItemRequestOptions()
-        );
-        // TODO: check response status
+    public void updateItem(WeatherCacheItem item) throws IOException {
+        try {
+            CosmosItemResponse<WeatherCacheItem> response = container.replaceItem(
+                    item,
+                    item.getId(),
+                    new PartitionKey(item.getId()),
+                    new CosmosItemRequestOptions()
+            );
+            // TODO: check response status
+        } catch (CosmosException exception) {
+            throw new IOException(exception);
+        }
     }
 
     @Override
-    public void deleteItem(String id) {
-        CosmosItemResponse<Object> response = container.deleteItem(
-                id, new PartitionKey(id), new CosmosItemRequestOptions()
-        );
-        // TODO: check response status
+    public void deleteItem(String id) throws IOException {
+        try {
+            CosmosItemResponse<Object> response = container.deleteItem(
+                    id, new PartitionKey(id), new CosmosItemRequestOptions()
+            );
+
+        } catch (CosmosException exception) {
+            throw new IOException(exception);
+        }
     }
 
     private static final String DATABASE_ID = "weatherdb";
