@@ -1,7 +1,10 @@
 package org.example.functions;
 
 import com.azure.cosmos.*;
+import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.*;
+
+import java.io.IOException;
 
 public class CosmosWeatherCacheDao implements WeatherCacheDao {
 
@@ -17,34 +20,23 @@ public class CosmosWeatherCacheDao implements WeatherCacheDao {
 
     @Override
     public void createItem(WeatherCacheItem item) {
-        // TODO: Normalize query - here or in service?
         CosmosItemResponse<WeatherCacheItem> response = container.createItem(item);
         // TODO: check response status
     }
 
     @Override
-    public WeatherCacheItem readItem(String id) {
-        CosmosItemResponse<WeatherCacheItem> itemResponse = container.readItem(
-                id, new PartitionKey(id), WeatherCacheItem.class
-        );
-        // TODO: check response status
-        return itemResponse.getItem();
-        /* TODO: decide between point read and query
-        List<SqlParameter> queryParameters= List.of(
-                new SqlParameter("@id", id)
-        );
-        SqlQuerySpec querySpec = new SqlQuerySpec(
-                "SELECT * FROM c WHERE (c.id = @id)",
-                queryParameters
-        );
-        CosmosPagedIterable<WeatherCacheItem> itemsPagedIterable = cosmosContainer.queryItems(
-                querySpec, new CosmosQueryRequestOptions(), WeatherCacheItem.class
-        );
-        for (WeatherCacheItem item : itemsPagedIterable) {
-            return item;
+    public WeatherCacheItem readItem(String id) throws IOException {
+        try {
+            CosmosItemResponse<WeatherCacheItem> itemResponse = container.readItem(
+                    id, new PartitionKey(id), WeatherCacheItem.class
+            );
+            // TODO: check response status
+            return itemResponse.getItem();
+        } catch (NotFoundException exception) {
+            return null;
+        } catch (CosmosException exception) {
+            throw new IOException(exception);
         }
-        return null;
-        */
     }
 
     @Override
